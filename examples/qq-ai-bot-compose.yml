@@ -1,0 +1,48 @@
+version: "3"
+
+services:
+  llonebot:
+    image: initialencounter/llonebot:latest
+    container_name: llonebot
+    restart: always
+    ports:
+      - 3001:3001
+      - 3080:3080
+    volumes:
+      - ./QQ:/root/.config/QQ
+      - ./llonebot:/root/llonebot
+    networks:
+      - qq_ai_bot
+
+  qq-ai-bot:
+    image: ghcr.io/happysnaker/qq-ai-bot:latest
+    container_name: qq-ai-bot
+    restart: always
+    environment:
+      - BOT_PORT=8080
+      - DATA_DIR=/app/data
+      - SESSION_FILE_PATH=/app/data/sessions.json
+      - ONEBOT_MODE=forward
+      # Docker 私有网络内可直接填 ws://llonebot:3001
+      # 跨主机 / 公网 / 反向代理请改成 wss://...
+      - ONEBOT_FORWARD_WS_URL=${ONEBOT_FORWARD_WS_URL}
+      - ONEBOT_ACCESS_TOKEN=llonebot-shared-token
+      - ONEBOT_ALLOW_GROUP=true
+      - ONEBOT_REQUIRE_MENTION_IN_GROUP=true
+      - ONEBOT_ALLOW_PRIVATE=true
+      - ONEBOT_PROGRESS_MODE=message
+      - ACP_AGENT_COMMAND=node
+      - 'ACP_AGENT_ARGS_JSON=["dist/examples/mock-acp-agent.js"]'
+      - ACP_AGENT_WORKDIR=/app
+      - ACP_REUSE_SESSION=true
+      - ACP_VERBOSE_MODE=verbose
+    ports:
+      - 18080:8080
+    volumes:
+      - ./qq-ai-bot/data:/app/data
+    networks:
+      - qq_ai_bot
+
+networks:
+  qq_ai_bot:
+    driver: bridge

@@ -46,6 +46,8 @@ docker run -d \
 
 如果你想把 LLOneBot 作为 **QQ ↔ AI** 链路的协议侧，可以直接接一个现成的 `qq-ai-bot`：
 
+完整 compose 示例见：[examples/qq-ai-bot-compose.yml](./examples/qq-ai-bot-compose.yml)
+
 ```yaml
 version: "3"
 services:
@@ -71,7 +73,7 @@ services:
       - DATA_DIR=/app/data
       - SESSION_FILE_PATH=/app/data/sessions.json
       - ONEBOT_MODE=forward
-      - ONEBOT_FORWARD_WS_URL=ws://llonebot:3001
+      - ONEBOT_FORWARD_WS_URL=${ONEBOT_FORWARD_WS_URL}
       - ONEBOT_ACCESS_TOKEN=llonebot-shared-token
       - ONEBOT_ALLOW_GROUP=true
       - ONEBOT_REQUIRE_MENTION_IN_GROUP=true
@@ -107,6 +109,8 @@ networks:
   "reportSelfMessage": false
 }
 ```
+
+如果你是在 **Docker 私有桥接网络** 内直接把两个容器互连，`ONEBOT_FORWARD_WS_URL` 可以填容器内网地址；如果你是跨主机、跨网络段，或者需要经过公网 / 反向代理，请改成带 TLS 的 `wss://...` 地址。
 
 注意：`qq-ai-bot` 里的 `ONEBOT_ACCESS_TOKEN` 必须和 LLOneBot OneBot11 配置里的 `token` 保持一致。
 
