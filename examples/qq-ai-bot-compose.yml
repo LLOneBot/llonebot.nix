@@ -23,8 +23,8 @@ services:
       - DATA_DIR=/app/data
       - SESSION_FILE_PATH=/app/data/sessions.json
       - ONEBOT_MODE=forward
-      # Docker 私有网络内可直接填 ws://llonebot:3001
-      # 跨主机 / 公网 / 反向代理请改成 wss://...
+      # Docker 私有网络内可直接填容器内网 WebSocket 地址
+      # 跨主机 / 公网 / 反向代理请改成带 TLS 的 WSS 地址
       - ONEBOT_FORWARD_WS_URL=${ONEBOT_FORWARD_WS_URL}
       - ONEBOT_ACCESS_TOKEN=llonebot-shared-token
       - ONEBOT_ALLOW_GROUP=true
