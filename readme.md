@@ -42,6 +42,77 @@ docker run -d \
   initialencounter/llonebot:latest
 ```
 
+## 接入 qq-ai-bot（可选）
+
+如果你想把 LLOneBot 作为 **QQ ↔ AI** 链路的协议侧，可以直接接一个现成的 `qq-ai-bot`：
+
+```yaml
+version: "3"
+services:
+  llonebot:
+    image: initialencounter/llonebot:latest
+    container_name: llonebot
+    restart: always
+    ports:
+      - 3001:3001
+      - 3080:3080
+    volumes:
+      - ./QQ:/root/.config/QQ
+      - ./llonebot:/root/llonebot
+    networks:
+      - qq_ai_bot
+
+  qq-ai-bot:
+    image: ghcr.io/happysnaker/qq-ai-bot:latest
+    container_name: qq-ai-bot
+    restart: always
+    environment:
+      - BOT_PORT=8080
+      - DATA_DIR=/app/data
+      - SESSION_FILE_PATH=/app/data/sessions.json
+      - ONEBOT_MODE=forward
+      - ONEBOT_FORWARD_WS_URL=ws://llonebot:3001
+      - ONEBOT_ACCESS_TOKEN=llonebot-shared-token
+      - ONEBOT_ALLOW_GROUP=true
+      - ONEBOT_REQUIRE_MENTION_IN_GROUP=true
+      - ONEBOT_ALLOW_PRIVATE=true
+      - ONEBOT_PROGRESS_MODE=message
+      - ACP_AGENT_COMMAND=node
+      - 'ACP_AGENT_ARGS_JSON=["dist/examples/mock-acp-agent.js"]'
+      - ACP_AGENT_WORKDIR=/app
+      - ACP_REUSE_SESSION=true
+      - ACP_VERBOSE_MODE=verbose
+    ports:
+      - 18080:8080
+    volumes:
+      - ./qq-ai-bot/data:/app/data
+    networks:
+      - qq_ai_bot
+
+networks:
+  qq_ai_bot:
+    driver: bridge
+```
+
+然后在 LLOneBot 的 OneBot11 配置里启用一个 **正向 WS**：
+
+```json5
+{
+  "type": "ws",
+  "enable": true,
+  "host": "0.0.0.0",
+  "port": 3001,
+  "token": "llonebot-shared-token",
+  "messageFormat": "array",
+  "reportSelfMessage": false
+}
+```
+
+注意：`qq-ai-bot` 里的 `ONEBOT_ACCESS_TOKEN` 必须和 LLOneBot OneBot11 配置里的 `token` 保持一致。
+
+- 项目地址：<https://github.com/happysnaker/qq-ai-bot>
+- 项目页：<https://happysnaker.github.io/qq-ai-bot/>
+
 ## 快速体验
 
 ```bash
