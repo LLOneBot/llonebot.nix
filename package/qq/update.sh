@@ -4,12 +4,25 @@ set -e
 url=${1:?Usage: update.sh URL}
 filename=${url##*/}
 
+# Tencent publishes two filename layouts concurrently:
+#   QQ_3.2.31_260710_amd64_01.deb  (release channel)
+#   linuxqq_3.2.34-53644_amd64.deb (beta channel, e.g. .../9.9.36/beta/<hash>/)
 case "$filename" in
   QQ_*_amd64_01.deb)
     artifact_prefix=${filename%_amd64_01.deb}
+    naming=release
     ;;
   QQ_*_arm64_01.deb)
     artifact_prefix=${filename%_arm64_01.deb}
+    naming=release
+    ;;
+  linuxqq_*_amd64.deb)
+    artifact_prefix=${filename%_amd64.deb}
+    naming=beta
+    ;;
+  linuxqq_*_arm64.deb)
+    artifact_prefix=${filename%_arm64.deb}
+    naming=beta
     ;;
   *)
     echo "Unsupported QQ download URL: $url" >&2
@@ -17,12 +30,25 @@ case "$filename" in
     ;;
 esac
 
-version_with_build=${artifact_prefix#QQ_}
-linux_version=${version_with_build/_/-}
+# The release layout separates version and build with _, the beta one with -.
+case "$naming" in
+  release)
+    amd64_suffix="_amd64_01.deb"
+    arm64_suffix="_arm64_01.deb"
+    version_with_build=${artifact_prefix#QQ_}
+    linux_version=${version_with_build/_/-}
+    ;;
+  beta)
+    amd64_suffix="_amd64.deb"
+    arm64_suffix="_arm64.deb"
+    linux_version=${artifact_prefix#linuxqq_}
+    ;;
+esac
+
 base_url=${url%/*}
 
-linux_x86_64_url="${base_url}/${artifact_prefix}_amd64_01.deb"
-linux_aarch64_url="${base_url}/${artifact_prefix}_arm64_01.deb"
+linux_x86_64_url="${base_url}/${artifact_prefix}${amd64_suffix}"
+linux_aarch64_url="${base_url}/${artifact_prefix}${arm64_suffix}"
 
 linux_x86_64_hash=$(nix-prefetch-url "$linux_x86_64_url")
 linux_aarch64_hash=$(nix-prefetch-url "$linux_aarch64_url")

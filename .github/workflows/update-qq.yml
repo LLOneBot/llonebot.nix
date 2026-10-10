@@ -42,13 +42,21 @@ jobs:
         chmod +x ./update.sh
 
         sources_file="package/qq/sources.nix"
-        old_version=$(grep -m1 'version = "' "$sources_file" | cut -d'"' -f2)
-        old_hash=$(grep -m1 'amd64_hash = "' "$sources_file" | cut -d'"' -f2)
+
+        # sources.nix has no *_amd64_hash key, and the first `version = "` is
+        # the empty any-darwin block, so read the x86_64-linux block. sed -n
+        # prints nothing and still exits 0, so a miss cannot trip set -e.
+        qq_field() {
+          sed -n '/x86_64-linux = {/,/^  };/{ s/^[[:space:]]*'"$1"' = "\([^"]*\)".*/\1/p }' "$sources_file" | head -n1
+        }
+
+        old_version=$(qq_field version)
+        old_hash=$(qq_field hash)
 
         ./update.sh qq "${{ github.event.inputs.url }}"
 
-        new_version=$(grep -m1 'version = "' "$sources_file" | cut -d'"' -f2)
-        new_hash=$(grep -m1 'amd64_hash = "' "$sources_file" | cut -d'"' -f2)
+        new_version=$(qq_field version)
+        new_hash=$(qq_field hash)
 
         if [[ "${old_hash}" != "${new_hash}" ]]; then
           git config --local user.email "actions@github.com"
@@ -70,7 +78,7 @@ jobs:
 
   build:
     needs: update
-    if: ${{ github.event.inputs.build }}
+    if: ${{ inputs.build }}
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
