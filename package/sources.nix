@@ -10,7 +10,7 @@
   pmhq_arm64_url = "https://github.com/linyuchen/PMHQ/releases/download/v9.0.4/pmhq-linux-arm64.zip";
   pmhq_arm64_hash = "sha256-I/9vvrEBl570ZH1yKzjiDpMvxniQLDT5oqlXTmWMyn0=";
   # ./update.sh llonebot 4.4.1
-  llonebot_version = "8.3.0";
-  llonebot_url = "https://github.com/LLOneBot/LuckyLilliaBot/releases/download/v8.3.0/LuckyLillia.zip";
-  llonebot_hash = "sha256-Lu83zcunlw7niexwz5DQ5kgOTJluupmny8sGHyibG4I=";
+  llonebot_version = "8.3.1";
+  llonebot_url = "https://github.com/LLOneBot/LuckyLilliaBot/releases/download/v8.3.1/LuckyLillia.zip";
+  llonebot_hash = "sha256-5oMeUUI/+di+GwveVfHdVydB/x3KZn/sd4zJX8577Vc=";
 }
