@@ -20,7 +20,7 @@ if [ "$package" = "pmhq" ]; then
 fi
 
 if [ "$package" = "llonebot" ]; then
-    url="https://github.com/LLOneBot/LLOneBot/releases/download/v$version/LLBot.zip"
+    url="https://github.com/LLOneBot/LuckyLilliaBot/releases/download/v$version/LuckyLillia.zip"
     hash=$(nix-prefetch-url $url)
     hash=$(nix hash convert --hash-algo sha256 "$hash")
     sed -i "s|# Last updated: .*\.|# Last updated: $(date +%F)\.|g" ./package/sources.nix
